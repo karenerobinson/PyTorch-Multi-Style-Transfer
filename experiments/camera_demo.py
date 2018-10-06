@@ -10,9 +10,20 @@ import utils
 from utils import StyleLoader
 
 def run_demo(args, mirror=False):
-	style_model = Net(ngf=args.ngf)
-	style_model.load_state_dict(torch.load(args.model))
-	style_model.eval()
+# changes per github issue 21
+#      	style_model = Net(ngf=args.ngf)
+#	style_model.load_state_dict(torch.load(args.model))
+
+        model_dict = torch.load(args.model)
+        model_dict_clone = model_dict.copy() # We can't mutate while iterating
+        for key, value in model_dict_clone.items():
+                if key.endswith(('running_mean', 'running_var')):
+                        del model_dict[key]
+
+        style_model = Net(ngf=128)
+        style_model.load_state_dict(model_dict, False)
+# end code added per github issue 21
+        style_model.eval()
 	if args.cuda:
 		style_loader = StyleLoader(args.style_folder, args.style_size)
 		style_model.cuda()
@@ -57,7 +68,9 @@ def run_demo(args, mirror=False):
 			simg = style_v.cpu().data[0].numpy()
 			img = img.cpu().clamp(0, 255).data[0].numpy()
 		else:
-			simg = style_v.data().numpy()
+#			simg = style_v.data().numpy()
+#			simg = style_v.data.numpy()
+       			simg = style_v.data.numpy().reshape((3,512,512)) #per yaroslav debugging
 			img = img.clamp(0, 255).data[0].numpy()
 		img = img.transpose(1, 2, 0).astype('uint8')
 		simg = simg.transpose(1, 2, 0).astype('uint8')

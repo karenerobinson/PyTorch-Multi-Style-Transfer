@@ -123,11 +123,25 @@ def train(args):
     train_dataset = datasets.ImageFolder(args.dataset, transform)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, **kwargs)
 
-    style_model = Net(ngf=args.ngf)
+# working on issue 21
+
+#    style_model = Net(ngf=args.ngf)
+
+    model_dict = torch.load(args.model)
+    model_dict_clone = model_dict.copy() # We can't mutate while iterating
+    for key, value in model_dict_clone.items():
+            if key.endswith(('running_mean', 'running_var')):
+                    del model_dict[key]
+    style_model = Net(ngf=128)
+#    style_model.load_state_dict(model_dict, False)
+
     if args.resume is not None:
         print('Resuming, initializing using weight from {}.'.format(args.resume))
-        style_model.load_state_dict(torch.load(args.resume))
+#        style_model.load_state_dict(torch.load(args.resume)) #*** resume? model? model_dict?
+        style_model.load_state_dict(model_dict, False)
     print(style_model)
+    
+# end code per issue 21
     optimizer = Adam(style_model.parameters(), args.lr)
     mse_loss = torch.nn.MSELoss()
 
