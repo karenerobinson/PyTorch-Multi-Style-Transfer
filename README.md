@@ -31,9 +31,10 @@ This repo provides PyTorch Implementation of **[MSG-Net (ours)](#msg-net)** and 
 </table>
 
 ### Stylize Images Using Pre-trained MSG-Net
-0. This code currently works with a previous version of torch, so downgrade:
+-1. This code currently works with a previous version of torch, so downgrade:
 
-	```pip uninstall torch
+	```bash
+	pip uninstall torch
 	pip install torch==0.3.0.post4```
 
 0. Download the pre-trained model
